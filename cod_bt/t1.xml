@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="cod_bt">
+  <BehaviorTree ID="cod_bt">
+    <Sequence>
+      <SayHello/>
+      <SendNav2Goal goal_pose="${goal_position}"/>
+      <SayBye/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="SayBye"
+            editable="true"/>
+    <Action ID="SayHello"
+            editable="true"/>
+    <Action ID="SendNav2Goal"
+            editable="true">
+      <input_port name="goal_pose"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>

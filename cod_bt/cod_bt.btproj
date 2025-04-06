@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" project_name="Project">
+    <include path="t1.xml"/>
+    <!-- Description of Node Models (used by Groot) -->
+    <TreeNodesModel>
+        <Action ID="SayBye" editable="true"/>
+        <Action ID="SayHello" editable="true"/>
+        <Action ID="SendNav2Goal" editable="true">
+            <input_port name="goal_pose"/>
+        </Action>
+    </TreeNodesModel>
+</root>
