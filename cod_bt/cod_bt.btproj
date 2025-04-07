@@ -3,6 +3,7 @@
     <include path="t1.xml"/>
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
+        <Action ID="CheckNavResult" editable="true"/>
         <Action ID="SayBye" editable="true"/>
         <Action ID="SayHello" editable="true"/>
         <Action ID="SendNav2Goal" editable="true">
