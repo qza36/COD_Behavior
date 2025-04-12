@@ -2,25 +2,17 @@
 <root BTCPP_format="4"
       main_tree_to_execute="cod_bt">
   <BehaviorTree ID="cod_bt">
-    <Fallback>
-      <SayHello/>
-      <Sequence>
-        <AlwaysSuccess/>
-        <SendNav2Goal goal_pose="${goal_position}"/>
-        <CheckNavResult/>
-      </Sequence>
+    <Sequence>
       <SendNav2Goal goal_pose="${goal_position}"/>
-      <SayBye/>
-    </Fallback>
+      <KeepRunningUntilFailure>
+        <CheckNavResult/>
+      </KeepRunningUntilFailure>
+    </Sequence>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
     <Action ID="CheckNavResult"
-            editable="true"/>
-    <Action ID="SayBye"
-            editable="true"/>
-    <Action ID="SayHello"
             editable="true"/>
     <Action ID="SendNav2Goal"
             editable="true">

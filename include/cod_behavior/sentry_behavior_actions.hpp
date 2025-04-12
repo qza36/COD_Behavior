@@ -3,40 +3,14 @@
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
+#include "std_msgs/msg/int32.hpp"
 
+// 定义共享的黑板键名
+#define GOAL_HANDLE_KEY "nav2_goal_handle"
 
-class SayHello : public BT::SyncActionNode
-{
-public:
-    SayHello(const std::string& name) : BT::SyncActionNode(name, {})
-    {
-    }
-
-    // 执行此节点时会调用此函数
-    BT::NodeStatus tick() override
-    {
-        RCLCPP_INFO(rclcpp::get_logger("COD_BEHAVIOR"), "Hello, ROS2 Behavior Tree!");
-        return BT::NodeStatus::SUCCESS;
-    }
-};
-class SayBye : public BT::SyncActionNode
-{
-public:
-    SayBye(const std::string& name) : BT::SyncActionNode(name, {})
-    {
-    }
-
-    // 执行此节点时会调用此函数
-    BT::NodeStatus tick() override
-    {
-        RCLCPP_INFO(rclcpp::get_logger("COD_BEHAVIOR"), "Bye, ROS2 Behavior Tree!");
-        return BT::NodeStatus::SUCCESS;
-    }
-};
 class SendNav2Goal : public BT::AsyncActionNode
 {
 public:
-
     SendNav2Goal(const std::string& name, const BT::NodeConfiguration& config)
         : BT::AsyncActionNode(name, config)
     {
@@ -57,10 +31,6 @@ public:
     BT::NodeStatus tick() override
     {
         RCLCPP_INFO(node_->get_logger(), "发送导航目标...");
-
-        // 简化测试：直接返回成功
-        // return BT::NodeStatus::SUCCESS;
-
 
         // 检查服务器是否可用
         if (!action_client_->wait_for_action_server(std::chrono::seconds(5))) {
@@ -89,9 +59,19 @@ public:
             return BT::NodeStatus::FAILURE;
         }
 
+        // 获取goal handle并保存到黑板
+        auto goal_handle = goal_handle_future.get();
+        if (!goal_handle) {
+            RCLCPP_ERROR(node_->get_logger(), "Goal was rejected by server");
+            return BT::NodeStatus::FAILURE;
+        }
+
+        // 使用树的共享黑板来存储goal handle
+        // 修改：使用config().blackboard替代blackboard()
+        config().blackboard->set(GOAL_HANDLE_KEY, goal_handle);
+
         RCLCPP_INFO(node_->get_logger(), "导航目标发送成功");
         return BT::NodeStatus::SUCCESS;
-
     }
 
 private:
@@ -99,107 +79,57 @@ private:
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
 };
 
-
 class CheckNavResult : public BT::AsyncActionNode
 {
 public:
     CheckNavResult(const std::string& name, const BT::NodeConfiguration& config)
         : BT::AsyncActionNode(name, config)
     {
+        // 初始化ROS2节点
+        node_ = rclcpp::Node::make_shared("nav_result_checker");
 
-        node_ = rclcpp::Node::make_shared("nav2_result_checker");
-        action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
-            node_, "navigate_to_pose");
+        // 创建订阅器来监听/isreached话题
+        reached_sub_ = node_->create_subscription<std_msgs::msg::Int32>(
+            "/isreached", 10,
+            std::bind(&CheckNavResult::reachedCallback, this, std::placeholders::_1));
+        nav_reached_ = false;
     }
 
-    // Define the ports provided by this node
     static BT::PortsList providedPorts()
     {
-        return {
-            BT::InputPort<std::string>("goal_id", "The ID of the navigation goal to check"),
-        };
+        return {}; // 不需要端口
     }
 
-    // Implementation of the tick method
+    // /isreached话题的回调函数
+    void reachedCallback(const std_msgs::msg::Int32::SharedPtr msg)
+    {
+        // 如果接收到值为1的消息，表示已到达
+        if (msg->data == 1) {
+            nav_reached_ = true;
+            RCLCPP_INFO(node_->get_logger(), "收到到达消息，目标已到达");
+        }
+    }
+
+
     BT::NodeStatus tick() override
     {
-        RCLCPP_INFO(node_->get_logger(), "Checking navigation result...");
+        RCLCPP_INFO(node_->get_logger(), "检查导航结果...");
 
-        // Check if action server is available
-        if (!action_client_->wait_for_action_server(std::chrono::seconds(5))) {
-            RCLCPP_ERROR(node_->get_logger(), "Nav2 Action server not available");
-            return BT::NodeStatus::FAILURE;
-        }
+        // 处理任何等待的回调
+        rclcpp::spin_some(node_);
 
-        // Get the goal ID from the input port
-        auto goal_id_str = getInput<std::string>("goal_id");
-        if (!goal_id_str) {
-            RCLCPP_ERROR(node_->get_logger(), "Goal ID not specified");
-            return BT::NodeStatus::FAILURE;
-        }
-
-        // Convert string goal ID to appropriate format
-        // This depends on how you're passing the goal ID between nodes
-        rclcpp_action::GoalUUID goal_uuid;
-        try {
-            // Parse the goal ID string to convert to GoalUUID
-            // This is a simplified example - actual implementation might differ
-            std::stringstream ss(*goal_id_str);
-            for (size_t i = 0; i < goal_uuid.size(); ++i) {
-                uint8_t byte;
-                ss >> byte;
-                goal_uuid[i] = byte;
-            }
-        } catch (const std::exception& e) {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to parse goal ID: %s", e.what());
-            return BT::NodeStatus::FAILURE;
-        }
-
-        // Get the goal handle from the action client
-        auto goal_handle = action_client_->async_get_result(goal_uuid);
-
-        // Wait for the result with a timeout
-        if (rclcpp::spin_until_future_complete(node_, goal_handle, std::chrono::seconds(5)) !=
-            rclcpp::FutureReturnCode::SUCCESS) {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to get navigation result");
-            return BT::NodeStatus::FAILURE;
-        }
-
-        // Get the result
-        auto result = goal_handle.get();
-
-        // Check if the navigation was successful
-        if (result.code == rclcpp_action::ResultCode::SUCCEEDED) {
-            RCLCPP_INFO(node_->get_logger(), "Navigation completed successfully");
-            setOutput("reached_goal", true);
-            setOutput("result_message", "Navigation goal reached");
+        // 检查是否已到达
+        if (nav_reached_) {
+            RCLCPP_INFO(node_->get_logger(), "导航已完成（收到到达消息）");
             return BT::NodeStatus::SUCCESS;
-        } else {
-            // Handle different result codes
-            std::string status_msg;
-            switch (result.code) {
-                case rclcpp_action::ResultCode::ABORTED:
-                    status_msg = "Navigation aborted";
-                    break;
-                case rclcpp_action::ResultCode::CANCELED:
-                    status_msg = "Navigation canceled";
-                    break;
-                default:
-                    status_msg = "Navigation failed with unknown reason";
-            }
-
-            RCLCPP_ERROR(node_->get_logger(), "%s", status_msg.c_str());
-            return BT::NodeStatus::FAILURE;
         }
-    }
 
-    // Method to handle halt (when the node is interrupted)
-    void halt() override
-    {
-        RCLCPP_INFO(node_->get_logger(), "Navigation check halted");
+        // 还未到达，继续运行
+        return BT::NodeStatus::RUNNING;
     }
 
 private:
     rclcpp::Node::SharedPtr node_;
-    rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr reached_sub_;
+    bool nav_reached_;
 };

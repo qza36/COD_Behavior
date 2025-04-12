@@ -19,10 +19,18 @@ find_package(rclcpp_action REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
 add_executable(cod_behavior src/sentry_behavior.cpp)
+add_executable(checkNavResult src/CheckNavResult.cpp)
 ament_target_dependencies(cod_behavior
         rclcpp
         nav2_msgs
         behaviortree_cpp_v3
+        example_interfaces
+        rclcpp_action
+        geometry_msgs
+)
+ament_target_dependencies(checkNavResult
+        rclcpp
+        nav2_msgs
         example_interfaces
         rclcpp_action
         geometry_msgs
@@ -33,5 +41,7 @@ include_directories(
 install(TARGETS cod_behavior
         DESTINATION lib/${PROJECT_NAME}
 )
-
+install(TARGETS checkNavResult
+        DESTINATION lib/${PROJECT_NAME}
+)
 ament_package()
