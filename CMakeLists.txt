@@ -44,4 +44,8 @@ install(TARGETS cod_behavior
 install(TARGETS checkNavResult
         DESTINATION lib/${PROJECT_NAME}
 )
+install(DIRECTORY
+        launch
+        DESTINATION share/${PROJECT_NAME}
+)
 ament_package()
