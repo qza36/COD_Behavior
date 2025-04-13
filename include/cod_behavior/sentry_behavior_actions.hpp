@@ -5,25 +5,19 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "std_msgs/msg/int32.hpp"
 
-// 定义共享的黑板键名
-#define GOAL_HANDLE_KEY "nav2_goal_handle"
-
 class SendNav2Goal : public BT::AsyncActionNode
 {
 public:
     SendNav2Goal(const std::string& name, const BT::NodeConfiguration& config)
         : BT::AsyncActionNode(name, config)
     {
-        // 在构造函数中初始化ROS2客户端
         node_ = rclcpp::Node::make_shared("nav2_goal_client");
         action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
             node_, "navigate_to_pose");
     }
 
-    // 定义节点提供的端口
     static BT::PortsList providedPorts()
     {
-        // 可以添加输入参数，如目标位置等
         return { BT::InputPort<geometry_msgs::msg::PoseStamped>("goal_pose", "导航目标位置") };
     }
 
@@ -58,18 +52,6 @@ public:
             RCLCPP_ERROR(node_->get_logger(), "发送导航目标失败");
             return BT::NodeStatus::FAILURE;
         }
-
-        // 获取goal handle并保存到黑板
-        auto goal_handle = goal_handle_future.get();
-        if (!goal_handle) {
-            RCLCPP_ERROR(node_->get_logger(), "Goal was rejected by server");
-            return BT::NodeStatus::FAILURE;
-        }
-
-        // 使用树的共享黑板来存储goal handle
-        // 修改：使用config().blackboard替代blackboard()
-        config().blackboard->set(GOAL_HANDLE_KEY, goal_handle);
-
         RCLCPP_INFO(node_->get_logger(), "导航目标发送成功");
         return BT::NodeStatus::SUCCESS;
     }
@@ -121,13 +103,12 @@ public:
             // 处理回调
             rclcpp::spin_some(node_);
 
-            // 检查是否已到达
             if (nav_reached_) {
                 RCLCPP_INFO(node_->get_logger(), "导航已完成（收到到达消息）");
                 return BT::NodeStatus::SUCCESS;
             }
 
-            // 关键点：返回RUNNING但允许行为树继续执行
+            // 返回RUNNING但允许行为树继续执行
             setStatusRunningAndYield();
         }
 
