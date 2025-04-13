@@ -78,12 +78,11 @@ private:
     rclcpp::Node::SharedPtr node_;
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
 };
-
-class CheckNavResult : public BT::AsyncActionNode
+class CheckNavResult : public BT::CoroActionNode
 {
 public:
     CheckNavResult(const std::string& name, const BT::NodeConfiguration& config)
-        : BT::AsyncActionNode(name, config)
+        : BT::CoroActionNode(name, config)
     {
         // 初始化ROS2节点
         node_ = rclcpp::Node::make_shared("nav_result_checker");
@@ -110,22 +109,29 @@ public:
         }
     }
 
-
     BT::NodeStatus tick() override
     {
-        RCLCPP_INFO(node_->get_logger(), "检查导航结果...");
+        RCLCPP_INFO(node_->get_logger(), "开始检查导航结果...");
 
-        // 处理任何等待的回调
-        rclcpp::spin_some(node_);
+        // 重置状态
+        nav_reached_ = false;
 
-        // 检查是否已到达
-        if (nav_reached_) {
-            RCLCPP_INFO(node_->get_logger(), "导航已完成（收到到达消息）");
-            return BT::NodeStatus::SUCCESS;
+        // 检查循环
+        while (!nav_reached_) {
+            // 处理回调
+            rclcpp::spin_some(node_);
+
+            // 检查是否已到达
+            if (nav_reached_) {
+                RCLCPP_INFO(node_->get_logger(), "导航已完成（收到到达消息）");
+                return BT::NodeStatus::SUCCESS;
+            }
+
+            // 关键点：返回RUNNING但允许行为树继续执行
+            setStatusRunningAndYield();
         }
 
-        // 还未到达，继续运行
-        return BT::NodeStatus::RUNNING;
+        return BT::NodeStatus::SUCCESS;
     }
 
 private:

@@ -4,9 +4,9 @@
   <BehaviorTree ID="cod_bt">
     <Sequence>
       <SendNav2Goal goal_pose="${goal_position}"/>
-      <KeepRunningUntilFailure>
+      <RetryUntilSuccessful num_attempts="-1">
         <CheckNavResult/>
-      </KeepRunningUntilFailure>
+      </RetryUntilSuccessful>
     </Sequence>
   </BehaviorTree>
 

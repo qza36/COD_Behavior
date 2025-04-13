@@ -17,7 +17,6 @@ public:
             std::bind(&NavResultChecker::feedbackCallback, this, std::placeholders::_1));
         reached_publisher_ = this->create_publisher<std_msgs::msg::Int32>(
             "/isreached", 10);
-
         current_distance_ = std::numeric_limits<float>::max();
         // 初始化current_distance_,
         // 否则在goal pose没有发布时，feedback.distance_remaining的值非非非非非非非非非非非长大
@@ -27,14 +26,13 @@ public:
             std::chrono::seconds(1),  // 每秒检查一次
             std::bind(&NavResultChecker::timerCallback, this));
 
-        RCLCPP_INFO(this->get_logger(), "导航结果检查节点已启动，等待反馈消息...");
+        //RCLCPP_INFO(this->get_logger(), "导航结果检查节点已启动，等待反馈消息...");
     }
 
 private:
     // 反馈回调函数
     void feedbackCallback(const FeedbackMsg::SharedPtr msg)
     {
-
         nav_reached_ = false;
         if (msg->feedback.distance_remaining<100)
         {
@@ -42,18 +40,16 @@ private:
             // 如果距离小于阈值，认为已到达
             if (current_distance_ < 0.2) {
                 nav_reached_ = true;
-                RCLCPP_INFO(this->get_logger(), "距离目标仅剩 %.2f 米，认为已到达", current_distance_);
-                RCLCPP_INFO(this->get_logger(), "已发布 1 到 /isreached 话题");
+                //RCLCPP_INFO(this->get_logger(), "已发布 1 到 /isreached 话题");
             } else {
-                RCLCPP_INFO(this->get_logger(), "距离目标还有 %.2f 米", current_distance_);
+                //RCLCPP_INFO(this->get_logger(), "距离目标还有 %.2f 米", current_distance_);
             }
         }
-
     }
     // 定时器回调函数
     void timerCallback()
     {
-        RCLCPP_INFO(this->get_logger(), "当前距离目标：%.2f 米", current_distance_);
+        //RCLCPP_INFO(this->get_logger(), "当前距离目标：%.2f 米", current_distance_);
         auto message = std_msgs::msg::Int32();
         message.data = 0; //初始化
         if (nav_reached_) {
@@ -62,7 +58,6 @@ private:
         reached_publisher_->publish(message);
 
     }
-
     rclcpp::Subscription<FeedbackMsg>::SharedPtr feedback_sub_;
     rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr reached_publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
