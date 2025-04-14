@@ -16,6 +16,7 @@ private:
     {
         auto msg = rm_interfaces::msg::SerialReceiveData();
         msg.judge_system_data.game_status = 1;
+        RCLCPP_INFO(this->get_logger(),"发布gamestatus:1");
         publisher_->publish(msg);
     }
     rclcpp::Publisher<rm_interfaces::msg::SerialReceiveData>::SharedPtr publisher_;
