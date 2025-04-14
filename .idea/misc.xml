@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Black">
+    <option name="pathToExecutable" value="/usr/bin/black" />
     <option name="sdkName" value="Python 3.10" />
   </component>
   <component name="CMakePythonSetting">
     <option name="pythonIntegrationState" value="NO" />
   </component>
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="WestSettings"><![CDATA[{}]]></component>
 </project>

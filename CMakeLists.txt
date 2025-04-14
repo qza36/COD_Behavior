@@ -17,9 +17,11 @@ find_package(nav2_msgs REQUIRED)
 find_package(example_interfaces REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(rm_interfaces REQUIRED)
 
 add_executable(cod_behavior src/sentry_behavior.cpp)
 add_executable(checkNavResult src/CheckNavResult.cpp)
+add_executable(msgtest test/msgTest.cpp)
 ament_target_dependencies(cod_behavior
         rclcpp
         nav2_msgs
@@ -35,6 +37,10 @@ ament_target_dependencies(checkNavResult
         rclcpp_action
         geometry_msgs
 )
+ament_target_dependencies(msgtest
+        rm_interfaces
+        rclcpp
+)
 include_directories(
         include
 )
@@ -44,6 +50,10 @@ install(TARGETS cod_behavior
 install(TARGETS checkNavResult
         DESTINATION lib/${PROJECT_NAME}
 )
+install(TARGETS msgtest
+        DESTINATION lib/${PROJECT_NAME}
+)
+
 install(DIRECTORY
         launch
         DESTINATION share/${PROJECT_NAME}
