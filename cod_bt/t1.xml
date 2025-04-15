@@ -3,6 +3,9 @@
       main_tree_to_execute="cod_bt">
   <BehaviorTree ID="cod_bt">
     <Sequence>
+      <RetryUntilSuccessful num_attempts="-1">
+        <CheckGameStatus/>
+      </RetryUntilSuccessful>
       <SendNav2Goal goal_pose="${goal_position}"/>
       <RetryUntilSuccessful num_attempts="-1">
         <CheckNavResult/>
@@ -12,6 +15,8 @@
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
+    <Action ID="CheckGameStatus"
+            editable="true"/>
     <Action ID="CheckNavResult"
             editable="true"/>
     <Action ID="SendNav2Goal"

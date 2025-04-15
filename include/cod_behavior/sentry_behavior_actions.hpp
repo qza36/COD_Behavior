@@ -4,6 +4,7 @@
 #include "nav2_msgs/action/navigate_to_pose.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "std_msgs/msg/int32.hpp"
+#include <rm_interfaces/msg/serial_receive_data.hpp>
 
 class SendNav2Goal : public BT::AsyncActionNode
 {
@@ -101,7 +102,7 @@ public:
         // 检查循环
         while (!nav_reached_) {
             // 处理回调
-            rclcpp::spin_some(node_);
+            rclcpp::spin_some(node_); //只处理当前队列中的回调后就返回
 
             if (nav_reached_) {
                 RCLCPP_INFO(node_->get_logger(), "导航已完成（收到到达消息）");
@@ -119,4 +120,51 @@ private:
     rclcpp::Node::SharedPtr node_;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr reached_sub_;
     bool nav_reached_;
+};
+
+
+class CheckGameStatus : public BT::CoroActionNode
+{
+public:
+    CheckGameStatus(const std::string& name,const BT::NodeConfiguration& config)
+        : BT::CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("game_status_checker");
+        game_status_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+        "/SerialReceiveData",10,
+        std::bind(&CheckGameStatus::gameStatusCallback,this,std::placeholders::_1));
+        is_start = false;
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+        RCLCPP_INFO(node_->get_logger(),"检查比赛状态...");
+        is_start = false;
+        while (!is_start)
+        {
+            spin_some(node_);
+            if (is_start){
+                RCLCPP_INFO(node_->get_logger(),"比赛开始");
+                return BT::NodeStatus::SUCCESS;
+            }
+            setStatusRunningAndYield();
+
+        }
+
+    }
+    void gameStatusCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    {
+        if (msg.judge_system_data.game_status==1)
+        {
+            is_start = true;
+        }
+
+    }
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr game_status_sub_;
+    bool is_start;
 };

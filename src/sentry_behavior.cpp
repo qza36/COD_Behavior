@@ -10,6 +10,7 @@ int main(int argc, char** argv)
     // 注册我们的自定义节点
     factory.registerNodeType<SendNav2Goal>("SendNav2Goal");
     factory.registerNodeType<CheckNavResult>("CheckNavResult");
+    factory.registerNodeType<CheckGameStatus>("CheckGameStatus");
 
     // 使用XML字符串定义行为树
     const std::string cod_bt = "/home/arlo/CLionProjects/bt/cod_behavior/cod_bt/t1.xml";

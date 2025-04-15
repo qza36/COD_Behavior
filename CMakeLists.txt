@@ -28,7 +28,9 @@ ament_target_dependencies(cod_behavior
         behaviortree_cpp_v3
         example_interfaces
         rclcpp_action
+        rm_interfaces
         geometry_msgs
+
 )
 ament_target_dependencies(checkNavResult
         rclcpp
