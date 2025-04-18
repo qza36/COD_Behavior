@@ -84,7 +84,7 @@ public:
     }
 
     // /isreached话题的回调函数
-    void reachedCallback(const std_msgs::msg::Int32::SharedPtr& msg)
+    void reachedCallback(const std_msgs::msg::Int32::SharedPtr msg)
     {
         // 如果接收到值为1的消息，表示已到达
         if (msg->data == 1) {
@@ -157,7 +157,7 @@ public:
         return BT::NodeStatus::SUCCESS;
 
     }
-    void gameStatusCallback(const rm_interfaces::msg::SerialReceiveData& msg)
+    void gameStatusCallback(const rm_interfaces::msg::SerialReceiveData msg)
     {
         if (msg.judge_system_data.game_status==1)
         {
