@@ -24,7 +24,7 @@ jobs:
 
       - name: Install Behavior Tree
         run: |
-          sudo apt install ros-humble-behavior*
+          sudo apt install ros-humble-behavior* -y
 
       - name: Setup Dependencies
         run: |
