@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8...3.31)
 project(cod_behavior)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

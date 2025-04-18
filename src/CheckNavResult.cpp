@@ -1,5 +1,4 @@
 #include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include <limits>
@@ -62,13 +61,13 @@ private:
     rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr reached_publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
     float current_distance_;
-    bool nav_reached_;
+    bool nav_reached_{}; //C++ 11 默认False
 };
 
 int main(int argc, char * argv[])
 {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<NavResultChecker>();
+    const auto node = std::make_shared<NavResultChecker>();
     RCLCPP_INFO(node->get_logger(), "开始运行导航结果检查节点");
     rclcpp::spin(node);
     rclcpp::shutdown();

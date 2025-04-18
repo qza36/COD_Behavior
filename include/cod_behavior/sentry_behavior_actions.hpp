@@ -1,3 +1,4 @@
+#pragma once
 #include "behaviortree_cpp_v3/bt_factory.h"
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
@@ -10,7 +11,7 @@ class SendNav2Goal : public BT::AsyncActionNode
 {
 public:
     SendNav2Goal(const std::string& name, const BT::NodeConfiguration& config)
-        : BT::AsyncActionNode(name, config)
+        : AsyncActionNode(name, config)
     {
         node_ = rclcpp::Node::make_shared("nav2_goal_client");
         action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
@@ -65,7 +66,7 @@ class CheckNavResult : public BT::CoroActionNode
 {
 public:
     CheckNavResult(const std::string& name, const BT::NodeConfiguration& config)
-        : BT::CoroActionNode(name, config)
+        : CoroActionNode(name, config)
     {
         // 初始化ROS2节点
         node_ = rclcpp::Node::make_shared("nav_result_checker");
@@ -83,7 +84,7 @@ public:
     }
 
     // /isreached话题的回调函数
-    void reachedCallback(const std_msgs::msg::Int32::SharedPtr msg)
+    void reachedCallback(const std_msgs::msg::Int32::SharedPtr& msg)
     {
         // 如果接收到值为1的消息，表示已到达
         if (msg->data == 1) {
@@ -127,13 +128,14 @@ class CheckGameStatus : public BT::CoroActionNode
 {
 public:
     CheckGameStatus(const std::string& name,const BT::NodeConfiguration& config)
-        : BT::CoroActionNode(name,config)
+        : CoroActionNode(name,config)
     {
         node_ = rclcpp::Node::make_shared("game_status_checker");
         game_status_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
         "/SerialReceiveData",10,
         std::bind(&CheckGameStatus::gameStatusCallback,this,std::placeholders::_1));
         is_start = false;
+        is_gohome = false;
     }
     static BT::PortsList providedPorts()
     {
@@ -151,11 +153,11 @@ public:
                 return BT::NodeStatus::SUCCESS;
             }
             setStatusRunningAndYield();
-
         }
+        return BT::NodeStatus::SUCCESS;
 
     }
-    void gameStatusCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    void gameStatusCallback(const rm_interfaces::msg::SerialReceiveData& msg)
     {
         if (msg.judge_system_data.game_status==1)
         {
@@ -167,4 +169,5 @@ private:
     rclcpp::Node::SharedPtr node_;
     rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr game_status_sub_;
     bool is_start;
+    bool is_gohome;
 };
