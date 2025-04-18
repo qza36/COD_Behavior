@@ -32,6 +32,7 @@ jobs:
           mkdir -p src
           git clone https://github.com/qza36/Sentry_vision.git src/Sentry_vision
           source /opt/ros/humble/setup.bash
+          cd src
           colcon build --packages-select rm_interfaces
           source install/setup.bash
 
