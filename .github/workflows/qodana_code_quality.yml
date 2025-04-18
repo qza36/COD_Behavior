@@ -23,26 +23,14 @@ jobs:
       - name: Install Behavior Tree
         run: sudo apt update && sudo apt install ros-humble-behavior* -y
 
-      - name: Clone dependencies
+      - name: ROS2 Action CI
         uses: ros-tooling/action-ros-ci@0.4.1
         with:
+          package-name: cod_behavior
           target-ros2-distro: humble
           vcs-repo-file-url: "${{ github.workspace }}/dependencies.repos"
           skip-tests: true
-          skip-build: true
 
-      - name: Build rm_interfaces first
-        run: |
-          source /opt/ros/humble/setup.sh
-          cd ${{ github.workspace }}
-          colcon build --packages-select rm_interfaces --event-handlers=console_cohesion+ --symlink-install
-          source install/setup.sh
-
-      - name: Build project
-        run: |
-          source /opt/ros/humble/setup.sh
-          source ${{ github.workspace }}/install/setup.sh
-          colcon build --event-handlers=console_cohesion+ --symlink-install
 
       - name: Qodana Scan
         uses: JetBrains/qodana-action@v2024.3

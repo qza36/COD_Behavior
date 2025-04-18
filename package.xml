@@ -14,6 +14,7 @@
   <depend>nav2_msgs</depend>
   <depend>example_interfaces</depend>
   <depend>geometry_msgs</depend>
+  <depend>rm_interfaces</depend>
 
 
   <test_depend>ament_lint_auto</test_depend>
