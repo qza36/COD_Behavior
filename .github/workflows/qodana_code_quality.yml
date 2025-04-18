@@ -3,13 +3,15 @@ on:
   workflow_dispatch:
   pull_request:
   push:
-    branches: # Specify your branches here
-      - main # The 'main' branch
-      - 'releases/*' # The release branches
+    branches:
+      - master
+      - 'releases/*'
 
 jobs:
   qodana:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    container:
+      image: rostooling/setup-ros-docker:ubuntu-jammy-ros-humble-desktop-latest
     permissions:
       contents: write
       pull-requests: write
@@ -17,8 +19,26 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
-          fetch-depth: 0  # a full history is required for pull request analysis
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
+
+      - name: Install Behavior Tree
+        run: |
+          sudo apt install ros-humble-behavior*
+
+      - name: Setup Dependencies
+        run: |
+          git clone https://github.com/qza36/Sentry_vision.git
+          cd Sentry_vision
+          colcon build --packages-select rm_interfaces
+          echo "source $(pwd)/install/setup.sh" >> $GITHUB_ENV
+
+      - name: ROS 2 CI Action
+        uses: ros-tooling/action-ros-ci@0.4.1
+        with:
+          target-ros2-distro: humble
+          skip-tests: true
+
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2024.3
         with:
