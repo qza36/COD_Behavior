@@ -30,8 +30,9 @@ jobs:
         run: |
           git clone https://github.com/qza36/Sentry_vision.git
           cd Sentry_vision
+          source /opt/ros/humble/setup.bash 
           colcon build --packages-select rm_interfaces
-          echo "source $(pwd)/install/setup.sh" >> $GITHUB_ENV
+          echo "source $(pwd)/install/setup.bash" >> $GITHUB_ENV
 
       - name: ROS 2 CI Action
         uses: ros-tooling/action-ros-ci@0.4.1
