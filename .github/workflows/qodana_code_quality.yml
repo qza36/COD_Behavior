@@ -17,7 +17,8 @@ jobs:
       pull-requests: write
       checks: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
@@ -25,14 +26,14 @@ jobs:
       - name: Install Behavior Tree
         run: sudo apt update && sudo apt install ros-humble-behavior* -y
 
-      - name: Setup Dependencies
+      - name: Setup and Build rm_interfaces
         shell: bash -l {0}
         run: |
-          git clone https://github.com/qza36/Sentry_vision.git
-          cd Sentry_vision
+          mkdir -p src
+          git clone https://github.com/qza36/Sentry_vision.git src/Sentry_vision
           source /opt/ros/humble/setup.bash
           colcon build --packages-select rm_interfaces
-          echo "source $(pwd)/install/setup.bash" >> $GITHUB_ENV
+          source install/setup.bash
 
       - name: ROS 2 CI Action
         uses: ros-tooling/action-ros-ci@0.4.1
