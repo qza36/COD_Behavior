@@ -8,5 +8,11 @@
         <Action ID="SendNav2Goal" editable="true">
             <input_port name="goal_pose"/>
         </Action>
+        <Action ID="gobaolei" editable="true"/>
+        <Action ID="isattacked" editable="true"/>
+        <Action ID="isgoinghome" editable="true"/>
+        <Action ID="lowpower" editable="true"/>
+        <Action ID="movearound" editable="true"/>
+        <Action ID="qsbroke" editable="true"/>
     </TreeNodesModel>
 </root>

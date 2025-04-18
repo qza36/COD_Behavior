@@ -3,26 +3,52 @@
       main_tree_to_execute="cod_bt">
   <BehaviorTree ID="cod_bt">
     <Sequence>
-      <RetryUntilSuccessful num_attempts="-1">
-        <CheckGameStatus/>
-      </RetryUntilSuccessful>
       <SendNav2Goal goal_pose="${goal_position}"/>
-      <RetryUntilSuccessful num_attempts="-1">
-        <CheckNavResult/>
-      </RetryUntilSuccessful>
+      <KeepRunningUntilFailure>
+        <Fallback>
+          <Sequence>
+            <isattacked/>
+            <KeepRunningUntilFailure>
+              <movearound/>
+            </KeepRunningUntilFailure>
+          </Sequence>
+          <Sequence>
+            <isgoinghome/>
+            <SendNav2Goal goal_pose="${home_goal_position}"/>
+            <Fallback>
+              <Sequence>
+                <lowpower/>
+                <SendNav2Goal goal_pose="${goal_position}"/>
+              </Sequence>
+              <SendNav2Goal goal_pose="${baolei_goal_position}"/>
+            </Fallback>
+          </Sequence>
+          <Sequence>
+            <qsbroke/>
+            <SendNav2Goal goal_pose="${baolei_goal_position}"/>
+          </Sequence>
+          <AlwaysSuccess/>
+        </Fallback>
+      </KeepRunningUntilFailure>
     </Sequence>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
-    <Action ID="CheckGameStatus"
-            editable="true"/>
-    <Action ID="CheckNavResult"
-            editable="true"/>
     <Action ID="SendNav2Goal"
             editable="true">
       <input_port name="goal_pose"/>
     </Action>
+    <Action ID="isattacked"
+            editable="true"/>
+    <Action ID="isgoinghome"
+            editable="true"/>
+    <Action ID="lowpower"
+            editable="true"/>
+    <Action ID="movearound"
+            editable="true"/>
+    <Action ID="qsbroke"
+            editable="true"/>
   </TreeNodesModel>
 
 </root>

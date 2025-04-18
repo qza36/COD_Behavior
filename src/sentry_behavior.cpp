@@ -27,6 +27,25 @@ int main(int argc, char** argv)
         goal.pose.position.z = 0.0;
         goal.pose.orientation.w = 1.0;
         blackboard->set<geometry_msgs::msg::PoseStamped>("goal_position", goal);
+
+        geometry_msgs::msg::PoseStamped homegoal;
+        homegoal.header.frame_id = "map";
+        homegoal.header.stamp = node->now();
+        homegoal.pose.position.x = 1.0;
+        homegoal.pose.position.y = 0.0;
+        homegoal.pose.position.z = 0.0;
+        homegoal.pose.orientation.w = 1.0;
+        blackboard->set<geometry_msgs::msg::PoseStamped>("home_goal_position", homegoal);
+
+
+        geometry_msgs::msg::PoseStamped baoleigoal;
+        baoleigoal.header.frame_id = "map";
+        baoleigoal.header.stamp = node->now();
+        baoleigoal.pose.position.x = 1.0;
+        baoleigoal.pose.position.y = 0.0;
+        baoleigoal.pose.position.z = 0.0;
+        baoleigoal.pose.orientation.w = 1.0;
+        blackboard->set<geometry_msgs::msg::PoseStamped>("baolei_goal_position", baoleigoal);
         tree.tickRootWhileRunning();
 
     } catch (const std::exception& e) {

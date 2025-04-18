@@ -171,3 +171,18 @@ private:
     bool is_start;
     bool is_gohome;
 };
+
+// class isattacked : public BT::AsyncActionNode
+// {
+//
+// };
+//
+// class movearound : public BT::AsyncActionNode
+// {
+//
+// };
+//
+// class isgoinghome : public BT::AsyncActionNode
+// {
+//
+// };
