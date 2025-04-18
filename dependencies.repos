@@ -1,0 +1,9 @@
+# Every repository listed here will get cloned and built during CI runs.
+# Use this for repositories that cannot be installed via rosdep.
+
+repositories:
+  rm_interfaces:
+    type: git
+    url: https://github.com/qza36/rm_interfaces
+    version: master
+
