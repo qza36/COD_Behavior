@@ -23,14 +23,14 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
 
       - name: Install Behavior Tree
-        run: |
-          sudo apt install ros-humble-behavior* -y
+        run: sudo apt update && sudo apt install ros-humble-behavior* -y
 
       - name: Setup Dependencies
+        shell: bash -l {0}
         run: |
           git clone https://github.com/qza36/Sentry_vision.git
           cd Sentry_vision
-          source /opt/ros/humble/setup.bash 
+          source /opt/ros/humble/setup.bash
           colcon build --packages-select rm_interfaces
           echo "source $(pwd)/install/setup.bash" >> $GITHUB_ENV
 
@@ -40,7 +40,7 @@ jobs:
           target-ros2-distro: humble
           skip-tests: true
 
-      - name: 'Qodana Scan'
+      - name: Qodana Scan
         uses: JetBrains/qodana-action@v2024.3
         with:
           pr-mode: false
