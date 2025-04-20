@@ -208,10 +208,41 @@ private:
     bool is_attacked = {};
 };
 
-// class movearound : public BT::CoroActionNode
-// {
-//
-// };
+class movearound : public BT::CoroActionNode
+{
+    public:
+    movearound(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("is_movearound_checker");
+        movearound_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+        "/SerialReceiveData",10,
+        std::bind(&movearound::movearoundCallback,this,std::placeholders::_1));
+        is_movearound = false;
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+        RCLCPP_INFO(node_->get_logger(),"开始小陀螺...");
+        return BT::NodeStatus::SUCCESS;
+    }
+
+    void movearoundCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    {
+        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
+        {
+            is_movearound = true;
+        }
+    }
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr movearound_sub_;
+    bool is_movearound = {};
+};
 //
 // class isgoinghome : public BT::CoroActionNode
 // {
