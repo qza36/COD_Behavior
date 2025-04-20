@@ -185,7 +185,7 @@ public:
         is_attacked = false;
 
     }
-    static BT::PortsList providedPots()
+    static BT::PortsList providedPorts()
     {
         return {};
     }
