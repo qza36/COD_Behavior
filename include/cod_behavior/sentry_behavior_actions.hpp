@@ -172,17 +172,48 @@ private:
     bool is_gohome;
 };
 
-// class isattacked : public BT::AsyncActionNode
+class isattacked : public BT::CoroActionNode
+{
+public:
+    isattacked(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("is_attacked_checker");
+        isattacked_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+        "/SerialReceiveData",10,
+        std::bind(&isattacked::isattackedCallback,this,std::placeholders::_1));
+        is_attacked = false;
+
+    }
+    static BT::PortsList providedPots()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+        RCLCPP_INFO(node_->get_logger(),"检查是否被击打...");
+        return BT::NodeStatus::SUCCESS;
+    }
+
+    void isattackedCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    {
+        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
+        {
+            is_attacked = true;
+        }
+    }
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr isattacked_sub_;
+    bool is_attacked = {};
+};
+
+// class movearound : public BT::CoroActionNode
 // {
 //
 // };
 //
-// class movearound : public BT::AsyncActionNode
-// {
-//
-// };
-//
-// class isgoinghome : public BT::AsyncActionNode
+// class isgoinghome : public BT::CoroActionNode
 // {
 //
 // };

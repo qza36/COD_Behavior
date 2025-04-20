@@ -11,6 +11,7 @@ int main(int argc, char** argv)
     factory.registerNodeType<SendNav2Goal>("SendNav2Goal");
     factory.registerNodeType<CheckNavResult>("CheckNavResult");
     factory.registerNodeType<CheckGameStatus>("CheckGameStatus");
+    factory.registerNodeType<isattacked>("isattacked");
 
     // 使用XML字符串定义行为树
     const std::string cod_bt = "/home/arlo/CLionProjects/bt/cod_behavior/cod_bt/t1.xml";
