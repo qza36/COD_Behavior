@@ -31,7 +31,7 @@ public:
         // 检查服务器是否可用
         if (!action_client_->wait_for_action_server(std::chrono::seconds(5))) {
             RCLCPP_ERROR(node_->get_logger(), "Nav2 Action server not available");
-            return BT::NodeStatus::FAILURE;
+            return BT::NodeStatus::SUCCESS;
         }
 
         // 从端口获取目标位置
@@ -192,6 +192,22 @@ public:
     BT::NodeStatus tick() override
     {
         RCLCPP_INFO(node_->get_logger(),"检查是否被击打...");
+
+        // 重置状态
+        is_attacked = false;
+
+        // 检查循环
+        while (!is_attacked) {
+            // 处理回调
+            rclcpp::spin_some(node_); //只处理当前队列中的回s后就返回
+            if (is_attacked) {
+                RCLCPP_INFO(node_->get_logger(), "被击打");
+                return BT::NodeStatus::SUCCESS;
+            }
+
+            // 返回RUNNING但允许行为树继续执行
+            setStatusRunningAndYield();
+        }
         return BT::NodeStatus::SUCCESS;
     }
 
@@ -228,7 +244,7 @@ class movearound : public BT::CoroActionNode
     BT::NodeStatus tick() override
     {
         RCLCPP_INFO(node_->get_logger(),"开始小陀螺...");
-        return BT::NodeStatus::SUCCESS;
+        return BT::NodeStatus::FAILURE;
     }
 
     void movearoundCallback(const rm_interfaces::msg::SerialReceiveData msg)
