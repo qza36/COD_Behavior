@@ -208,12 +208,145 @@ private:
     bool is_attacked = {};
 };
 
-// class movearound : public BT::CoroActionNode
-// {
-//
-// };
-//
-// class isgoinghome : public BT::CoroActionNode
-// {
-//
-// };
+class movearound : public BT::CoroActionNode
+{
+    public:
+    movearound(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("is_movearound_checker");
+        movearound_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+        "/SerialReceiveData",10,
+        std::bind(&movearound::movearoundCallback,this,std::placeholders::_1));
+        is_movearound = false;
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+        RCLCPP_INFO(node_->get_logger(),"开始小陀螺...");
+        return BT::NodeStatus::SUCCESS;
+    }
+
+    void movearoundCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    {
+        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
+        {
+            is_movearound = true;
+        }
+    }
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr movearound_sub_;
+    bool is_movearound = {};
+};
+
+class isgoinghome : public BT::CoroActionNode
+{
+    public:
+    isgoinghome(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("is_isgoinghome_checker");
+        isgoinghome_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+        "/SerialReceiveData",10,
+        std::bind(&isgoinghome::isgoinghomeCallback,this,std::placeholders::_1));
+        is_isgoinghome  = false;
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+        RCLCPP_INFO(node_->get_logger(),"检测是否在回家...");
+        return BT::NodeStatus::SUCCESS;
+    }
+
+    void isgoinghomeCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    {
+        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
+        {
+            is_isgoinghome = true;
+        }
+    }
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr isgoinghome_sub_;
+    bool is_isgoinghome = {};
+};
+class lowpower : public BT::CoroActionNode
+{
+    public:
+    lowpower(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("is_lowpower_checker");
+        lowpower_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+        "/SerialReceiveData",10,
+        std::bind(&lowpower::lowpowerCallback,this,std::placeholders::_1));
+        is_lowpower = false;
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+        RCLCPP_INFO(node_->get_logger(),"开始低能模式...");
+        return BT::NodeStatus::SUCCESS;
+    }
+
+    void lowpowerCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    {
+        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
+        {
+            is_lowpower = true;
+        }
+    }
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr lowpower_sub_;
+    bool is_lowpower = {};
+};
+class qsbroke : public BT::CoroActionNode
+{
+    public:
+    qsbroke(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("is_qsbroke_checker");
+        qsbroke_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+        "/SerialReceiveData",10,
+        std::bind(&qsbroke::qsbrokeCallback,this,std::placeholders::_1));
+        is_qsbroke = false;
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+        RCLCPP_INFO(node_->get_logger(),"开始qsbroke...");
+        return BT::NodeStatus::SUCCESS;
+    }
+
+    void qsbrokeCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    {
+        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
+        {
+            is_qsbroke = true;
+        }
+    }
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr qsbroke_sub_;
+    bool is_qsbroke = {};
+};
+
