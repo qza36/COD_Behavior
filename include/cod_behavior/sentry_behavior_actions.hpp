@@ -31,7 +31,7 @@ public:
         // 检查服务器是否可用
         if (!action_client_->wait_for_action_server(std::chrono::seconds(5))) {
             RCLCPP_ERROR(node_->get_logger(), "Nav2 Action server not available");
-            return BT::NodeStatus::SUCCESS;
+            return BT::NodeStatus::FAILURE;
         }
 
         // 从端口获取目标位置
