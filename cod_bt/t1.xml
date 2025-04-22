@@ -8,9 +8,7 @@
         <Fallback>
           <Sequence>
             <isattacked/>
-            <KeepRunningUntilFailure>
-              <movearound/>
-            </KeepRunningUntilFailure>
+            <movearound/>
           </Sequence>
           <Sequence>
             <isgoinghome/>

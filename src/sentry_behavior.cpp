@@ -18,7 +18,7 @@ int main(int argc, char** argv)
     factory.registerNodeType<qsbroke>("qsbroke");
 
     // 使用XML字符串定义行为树
-    const std::string cod_bt = "/home/cod-y/cod_bt/cod_behavior/cod_bt/t1.xml";
+    const std::string cod_bt = "/home/arlo/CLionProjects/bt/cod_behavior/cod_bt/t1.xml";
 
     try {
         auto tree = factory.createTreeFromFile(cod_bt);

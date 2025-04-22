@@ -197,7 +197,8 @@ public:
         is_attacked = false;
 
         // 检查循环
-        while (!is_attacked) {
+        while (!is_attacked)
+        {
             // 处理回调
             rclcpp::spin_some(node_); //只处理当前队列中的回s后就返回
             if (is_attacked) {
@@ -231,9 +232,7 @@ class movearound : public BT::CoroActionNode
         : CoroActionNode(name,config)
     {
         node_ = rclcpp::Node::make_shared("is_movearound_checker");
-        movearound_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
-        "/SerialReceiveData",10,
-        std::bind(&movearound::movearoundCallback,this,std::placeholders::_1));
+        spin_cmd_pub_ = node_->create_publisher<rm_interfaces::msg::OperatorCommand>("Serialsend",10);
         is_movearound = false;
 
     }
@@ -243,20 +242,15 @@ class movearound : public BT::CoroActionNode
     }
     BT::NodeStatus tick() override
     {
+        auto msg = rm_interfaces::msg::OperatorCommand();
+        msg.is_spin=1;
         RCLCPP_INFO(node_->get_logger(),"开始小陀螺...");
+        spin_cmd_pub_->publish(msg);
         return BT::NodeStatus::FAILURE;
-    }
-
-    void movearoundCallback(const rm_interfaces::msg::SerialReceiveData msg)
-    {
-        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
-        {
-            is_movearound = true;
-        }
     }
 private:
     rclcpp::Node::SharedPtr node_;
-    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr movearound_sub_;
+    rclcpp::Publisher<rm_interfaces::msg::OperatorCommand>::SharedPtr spin_cmd_pub_;
     bool is_movearound = {};
 };
 
@@ -270,7 +264,7 @@ class isgoinghome : public BT::CoroActionNode
         isgoinghome_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
         "/SerialReceiveData",10,
         std::bind(&isgoinghome::isgoinghomeCallback,this,std::placeholders::_1));
-        is_isgoinghome  = false;
+        is_goinghome  = false;
 
     }
     static BT::PortsList providedPorts()
@@ -279,21 +273,33 @@ class isgoinghome : public BT::CoroActionNode
     }
     BT::NodeStatus tick() override
     {
-        RCLCPP_INFO(node_->get_logger(),"检测是否在回家...");
+        RCLCPP_INFO(node_->get_logger(),"检测是否要回家...");
+        is_goinghome = false;
+        while (!is_goinghome)
+        {
+            rclcpp::spin_some(node_);
+            if (is_goinghome)
+            {
+                RCLCPP_INFO(node_->get_logger(), "被击打");
+                return BT::NodeStatus::SUCCESS;
+            }
+            setStatusRunningAndYield();
+        }
+
         return BT::NodeStatus::SUCCESS;
     }
 
     void isgoinghomeCallback(const rm_interfaces::msg::SerialReceiveData msg)
     {
-        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
+        if (msg.judge_system_data.game_status==1)
         {
-            is_isgoinghome = true;
+            is_goinghome = true;
         }
     }
 private:
     rclcpp::Node::SharedPtr node_;
     rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr isgoinghome_sub_;
-    bool is_isgoinghome = {};
+    bool is_goinghome = {};
 };
 class lowpower : public BT::CoroActionNode
 {
@@ -349,13 +355,13 @@ class qsbroke : public BT::CoroActionNode
     }
     BT::NodeStatus tick() override
     {
-        RCLCPP_INFO(node_->get_logger(),"开始qsbroke...");
+        RCLCPP_INFO(node_->get_logger(),"检查我方前哨战是否被毁");
         return BT::NodeStatus::SUCCESS;
     }
 
     void qsbrokeCallback(const rm_interfaces::msg::SerialReceiveData msg)
     {
-        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
+        if (msg.judge_system_data.game_status==1)
         {
             is_qsbroke = true;
         }
@@ -365,4 +371,3 @@ private:
     rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr qsbroke_sub_;
     bool is_qsbroke = {};
 };
-
