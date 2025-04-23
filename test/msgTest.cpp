@@ -15,9 +15,9 @@ private:
     void timer_callback()
     {
         auto msg = rm_interfaces::msg::SerialReceiveData();
-        //msg.judge_system_data.game_status = 1;
-        msg.judge_system_data.operator_command.is_outpost_attacking=1;
-        RCLCPP_INFO(this->get_logger(),"发布isattacked:1");
+        msg.judge_system_data.game_status = 1;
+        msg.judge_system_data.operator_command.is_outpost_attacking=0;
+        RCLCPP_INFO(this->get_logger(),"发布被击打指令，发布回家指令");
         publisher_->publish(msg);
     }
     rclcpp::Publisher<rm_interfaces::msg::SerialReceiveData>::SharedPtr publisher_;

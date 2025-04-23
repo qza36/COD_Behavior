@@ -12,7 +12,15 @@
           </Sequence>
           <Sequence>
             <isgoinghome/>
-            <SendNav2Goal goal_pose="${home_goal_position}"/>
+            <KeepRunningUntilFailure>
+              <Sequence>
+                <SendNav2Goal goal_pose="${home_goal_position}"/>
+                <Fallback>
+                  <is_hp_full/>
+                  <AlwaysFailure/>
+                </Fallback>
+              </Sequence>
+            </KeepRunningUntilFailure>
             <Fallback>
               <Sequence>
                 <lowpower/>
@@ -39,6 +47,8 @@
             editable="true">
       <input_port name="goal_pose"/>
     </Action>
+    <Action ID="is_hp_full"
+            editable="true"/>
     <Action ID="isattacked"
             editable="true"/>
     <Action ID="isgoinghome"

@@ -57,7 +57,6 @@ public:
         RCLCPP_INFO(node_->get_logger(), "导航目标发送成功");
         return BT::NodeStatus::SUCCESS;
     }
-
 private:
     rclcpp::Node::SharedPtr node_;
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
@@ -92,7 +91,6 @@ public:
             RCLCPP_INFO(node_->get_logger(), "收到到达消息，目标已到达");
         }
     }
-
     BT::NodeStatus tick() override
     {
         RCLCPP_INFO(node_->get_logger(), "开始检查导航结果...");
@@ -122,8 +120,6 @@ private:
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr reached_sub_;
     bool nav_reached_;
 };
-
-
 class CheckGameStatus : public BT::CoroActionNode
 {
 public:
@@ -171,7 +167,6 @@ private:
     bool is_start;
     bool is_gohome;
 };
-
 class isattacked : public BT::CoroActionNode
 {
 public:
@@ -204,10 +199,13 @@ public:
             if (is_attacked) {
                 RCLCPP_INFO(node_->get_logger(), "被击打");
                 return BT::NodeStatus::SUCCESS;
+            }else
+            {
+
+                RCLCPP_INFO(node_->get_logger(), "没被击打");
+                return BT::NodeStatus::FAILURE;
             }
 
-            // 返回RUNNING但允许行为树继续执行
-            setStatusRunningAndYield();
         }
         return BT::NodeStatus::SUCCESS;
     }
@@ -224,7 +222,6 @@ private:
     rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr isattacked_sub_;
     bool is_attacked = {};
 };
-
 class movearound : public BT::CoroActionNode
 {
     public:
@@ -253,7 +250,6 @@ private:
     rclcpp::Publisher<rm_interfaces::msg::OperatorCommand>::SharedPtr spin_cmd_pub_;
     bool is_movearound = {};
 };
-
 class isgoinghome : public BT::CoroActionNode
 {
     public:
@@ -321,7 +317,7 @@ class lowpower : public BT::CoroActionNode
     BT::NodeStatus tick() override
     {
         RCLCPP_INFO(node_->get_logger(),"开始低能模式...");
-        return BT::NodeStatus::SUCCESS;
+        return BT::NodeStatus::FAILURE;
     }
 
     void lowpowerCallback(const rm_interfaces::msg::SerialReceiveData msg)
@@ -361,7 +357,7 @@ class qsbroke : public BT::CoroActionNode
 
     void qsbrokeCallback(const rm_interfaces::msg::SerialReceiveData msg)
     {
-        if (msg.judge_system_data.game_status==1)
+        if (msg.judge_system_data.game_status==2)
         {
             is_qsbroke = true;
         }
