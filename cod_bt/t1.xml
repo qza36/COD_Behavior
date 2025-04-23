@@ -20,10 +20,12 @@
               </Sequence>
               <SendNav2Goal goal_pose="${baolei_goal_position}"/>
             </Fallback>
+            <AlwaysFailure/>
           </Sequence>
           <Sequence>
             <qsbroke/>
             <SendNav2Goal goal_pose="${baolei_goal_position}"/>
+            <AlwaysFailure/>
           </Sequence>
           <AlwaysSuccess/>
         </Fallback>

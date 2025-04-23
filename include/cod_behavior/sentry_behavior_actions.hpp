@@ -280,7 +280,7 @@ class isgoinghome : public BT::CoroActionNode
             rclcpp::spin_some(node_);
             if (is_goinghome)
             {
-                RCLCPP_INFO(node_->get_logger(), "被击打");
+                RCLCPP_INFO(node_->get_logger(), "接收到回家指令");
                 return BT::NodeStatus::SUCCESS;
             }
             setStatusRunningAndYield();
@@ -326,7 +326,7 @@ class lowpower : public BT::CoroActionNode
 
     void lowpowerCallback(const rm_interfaces::msg::SerialReceiveData msg)
     {
-        if (msg.judge_system_data.operator_command.is_outpost_attacking==1)
+        if (msg.judge_system_data.is_lowpower==1)
         {
             is_lowpower = true;
         }
