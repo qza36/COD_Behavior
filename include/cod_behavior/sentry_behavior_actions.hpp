@@ -229,9 +229,7 @@ class movearound : public BT::CoroActionNode
         : CoroActionNode(name,config)
     {
         node_ = rclcpp::Node::make_shared("is_movearound_checker");
-        spin_cmd_pub_ = node_->create_publisher<rm_interfaces::msg::OperatorCommand>("Serialsend",10);
-        is_movearound = false;
-
+        spin_cmd_pub_ = node_->create_publisher<rm_interfaces::msg::OperatorCommand>("SerialSend",10);
     }
     static BT::PortsList providedPorts()
     {
@@ -248,7 +246,6 @@ class movearound : public BT::CoroActionNode
 private:
     rclcpp::Node::SharedPtr node_;
     rclcpp::Publisher<rm_interfaces::msg::OperatorCommand>::SharedPtr spin_cmd_pub_;
-    bool is_movearound = {};
 };
 class isgoinghome : public BT::CoroActionNode
 {
@@ -478,5 +475,32 @@ private:
     rclcpp::Node::SharedPtr node_;
     rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr shut_num_sub_;
     bool is_low_shut_num = {};
+};
+class buy_shut : public BT::CoroActionNode
+{
+public:
+    buy_shut(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("buy_shut");
+        buy_shut_pub_ = node_->create_publisher<rm_interfaces::msg::OperatorCommand>("SerialSend",10);
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+        auto msg = rm_interfaces::msg::OperatorCommand();
+        msg.is_buyshut=1;
+        RCLCPP_INFO(node_->get_logger(),"发布买弹指令...");
+        buy_shut_pub_->publish(msg);
+        return BT::NodeStatus::SUCCESS;
+    }
+
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Publisher<rm_interfaces::msg::OperatorCommand>::SharedPtr buy_shut_pub_;
 };
 
