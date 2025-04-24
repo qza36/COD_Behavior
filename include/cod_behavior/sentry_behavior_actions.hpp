@@ -367,3 +367,45 @@ private:
     rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr qsbroke_sub_;
     bool is_qsbroke = {};
 };
+class is_lowhp : public BT::CoroActionNode
+{
+public:
+    is_lowhp(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("is_is_lowhp_checker");
+        is_lowhp_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+        "/SerialReceiveData",10,
+        std::bind(&is_lowhp::hpCallback,this,std::placeholders::_1));
+        is_is_lowhp = false;
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {BT::InputPort<int>("hp")};
+    }
+    BT::NodeStatus tick() override
+    {
+        RCLCPP_INFO(node_->get_logger(),"检查血量是否低于阈值");
+        return BT::NodeStatus::SUCCESS;
+    }
+
+    void hpCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    {   auto hp = getInput<int>("hp");
+        // 检查hp是否包含有效值
+        if (hp.has_value()) {
+            // 使用hp.value()获取实际的int值
+            if (msg.judge_system_data.hp < hp.value()) {
+                is_is_lowhp = true;
+            }
+        } else {
+            // 处理错误情况
+            RCLCPP_ERROR(rclcpp::get_logger("sentry_behavior"),
+                        "获取hp参数失败: %s", hp.error().c_str());
+        }
+    }
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr is_lowhp_sub_;
+    bool is_is_lowhp = {};
+};
