@@ -373,7 +373,7 @@ public:
     is_lowhp(const std::string& name,const BT::NodeConfiguration& config)
         : CoroActionNode(name,config)
     {
-        node_ = rclcpp::Node::make_shared("is_is_lowhp_checker");
+        node_ = rclcpp::Node::make_shared("lowhp_checker");
         is_lowhp_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
         "/SerialReceiveData",10,
         std::bind(&is_lowhp::hpCallback,this,std::placeholders::_1));
@@ -386,7 +386,22 @@ public:
     }
     BT::NodeStatus tick() override
     {
+        is_is_lowhp = false;
         RCLCPP_INFO(node_->get_logger(),"检查血量是否低于阈值");
+        while (!is_is_lowhp)
+        {
+            rclcpp::spin_some(node_);
+            if (is_is_lowhp)
+            {
+                RCLCPP_INFO(node_->get_logger(),"血量低于阈值");
+                return BT::NodeStatus::SUCCESS;
+            }else
+            {
+                RCLCPP_INFO(node_->get_logger(),"血量健康");
+                return BT::NodeStatus::FAILURE;
+            }
+
+        }
         return BT::NodeStatus::SUCCESS;
     }
 
@@ -409,3 +424,59 @@ private:
     rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr is_lowhp_sub_;
     bool is_is_lowhp = {};
 };
+class check_allow_shut_num : public BT::CoroActionNode
+{
+public:
+    check_allow_shut_num(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("lowhp_checker");
+        shut_num_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+        "/SerialReceiveData",10,
+        std::bind(&check_allow_shut_num::CheckShutNumCallback,this,std::placeholders::_1));
+        is_low_shut_num = false;
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {BT::InputPort<int>("allow_shut_num")};
+    }
+    BT::NodeStatus tick() override
+    {
+        is_low_shut_num = false;
+        RCLCPP_INFO(node_->get_logger(),"检查允许发弹量是否低于阈值");
+        while (!is_low_shut_num)
+        {
+            rclcpp::spin_some(node_);
+            if (is_low_shut_num)
+            {
+                RCLCPP_INFO(node_->get_logger(),"允许发弹量低于阈值");
+                return BT::NodeStatus::SUCCESS;
+            }else
+            {
+                RCLCPP_INFO(node_->get_logger(),"允许发弹量健康");
+                return BT::NodeStatus::FAILURE;
+            }
+        }
+        return BT::NodeStatus::SUCCESS;
+    }
+
+    void CheckShutNumCallback(const rm_interfaces::msg::SerialReceiveData msg)
+    {   auto allow_shut_num = getInput<int>("allow_shut_num");
+        if (allow_shut_num.has_value()) {
+
+            if (msg.judge_system_data.shut_num < allow_shut_num.value()) {
+                is_low_shut_num = true;
+            }
+        } else {
+            // 处理错误情况
+            RCLCPP_ERROR(rclcpp::get_logger("sentry_behavior"),
+                        "获取allow_shut_num参数失败: %s", allow_shut_num.error().c_str());
+        }
+    }
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr shut_num_sub_;
+    bool is_low_shut_num = {};
+};
+
