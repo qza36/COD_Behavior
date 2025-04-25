@@ -503,4 +503,76 @@ private:
     rclcpp::Node::SharedPtr node_;
     rclcpp::Publisher<rm_interfaces::msg::OperatorCommand>::SharedPtr buy_shut_pub_;
 };
+class attack_qs : public BT::CoroActionNode
+{
+public:
+    attack_qs(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("attack_qs");
+        attack_qs_pub_ = node_->create_publisher<rm_interfaces::msg::OperatorCommand>("SerialSend",10);
 
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+        auto msg = rm_interfaces::msg::OperatorCommand();
+        msg.is_buyshut=1;
+        RCLCPP_INFO(node_->get_logger(),"发布攻击前哨站指令...");
+        attack_qs_pub_->publish(msg);
+        return BT::NodeStatus::SUCCESS;
+    }
+
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Publisher<rm_interfaces::msg::OperatorCommand>::SharedPtr attack_qs_pub_;
+};
+class is_qs_hp_low : public BT::CoroActionNode
+{
+public:
+    is_qs_hp_low(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("qs_hp_checker");
+        qs_hp_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+            "/SerialReceiveData",10,
+            std::bind(&is_qs_hp_low::QsHpChecker,this,std::placeholders::_1));
+        is_qs_hp_low_ = false;
+
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {BT::InputPort<int>("qs_hp")};
+    }
+    BT::NodeStatus tick() override
+    {
+
+        RCLCPP_INFO(node_->get_logger(),"检查前哨战血量是否健康...");
+        return BT::NodeStatus::SUCCESS;
+    }
+    void QsHpChecker(const rm_interfaces::msg::SerialReceiveData::SharedPtr msg)
+    {
+        auto qs_hp = getInput<int>("qs_hp");
+        if (qs_hp.has_value())
+        {
+           if (msg->judge_system_data.qs_hp< qs_hp.value())
+           {
+               is_qs_hp_low_ = true;
+           }
+        }else
+        {
+            RCLCPP_ERROR(rclcpp::get_logger("sentry_behavior"),
+             "获取qs_hp参数失败: %s", qs_hp.error().c_str());
+        }
+    }
+
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr qs_hp_sub_;
+    bool is_qs_hp_low_ = {};
+
+};
