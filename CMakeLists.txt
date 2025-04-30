@@ -57,7 +57,7 @@ install(TARGETS msgtest
 )
 
 install(DIRECTORY
-        launch
+        launch cod_bt actions
         DESTINATION share/${PROJECT_NAME}
 )
 ament_package()

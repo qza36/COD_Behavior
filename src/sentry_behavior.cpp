@@ -16,6 +16,7 @@ int main(int argc, char** argv)
     factory.registerNodeType<isgoinghome>("isgoinghome");
     factory.registerNodeType<lowpower>("lowpower");
     factory.registerNodeType<qsbroke>("qsbroke");
+    factory.registerNodeType<is_hp_full>("is_hp_full");
 
     // 使用XML字符串定义行为树
     const std::string cod_bt = "/home/arlo/CLionProjects/bt/cod_behavior/cod_bt/t1.xml";
@@ -47,7 +48,7 @@ int main(int argc, char** argv)
         baoleigoal.header.frame_id = "map";
         baoleigoal.header.stamp = node->now();
         baoleigoal.pose.position.x = -2.0;
-        baoleigoal.pose.position.y = -2.0;
+        baoleigoal.pose.position.y = 2.0;
         baoleigoal.pose.position.z = 0.0;
         baoleigoal.pose.orientation.w = 1.0;
         blackboard->set<geometry_msgs::msg::PoseStamped>("baolei_goal_position", baoleigoal);
@@ -56,7 +57,7 @@ int main(int argc, char** argv)
         qs_goal.header.frame_id = "map";
         qs_goal.header.stamp = node->now();
         qs_goal.pose.position.x = -2.0;
-        qs_goal.pose.position.y = -2.0;
+        qs_goal.pose.position.y = 3.0;
         qs_goal.pose.position.z = 0.0;
         qs_goal.pose.orientation.w = 1.0;
         blackboard->set<geometry_msgs::msg::PoseStamped>("qs_goal_position", qs_goal);

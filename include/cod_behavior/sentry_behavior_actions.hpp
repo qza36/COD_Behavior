@@ -275,8 +275,11 @@ class isgoinghome : public BT::CoroActionNode
             {
                 RCLCPP_INFO(node_->get_logger(), "接收到回家指令");
                 return BT::NodeStatus::SUCCESS;
+            }else
+            {
+                RCLCPP_INFO(node_->get_logger(), "不需要回家");
+                return BT::NodeStatus::FAILURE;
             }
-            setStatusRunningAndYield();
         }
 
         return BT::NodeStatus::SUCCESS;
@@ -574,5 +577,56 @@ private:
     rclcpp::Node::SharedPtr node_;
     rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr qs_hp_sub_;
     bool is_qs_hp_low_ = {};
+
+};
+class is_hp_full : public BT::CoroActionNode
+{
+public:
+    is_hp_full(const std::string& name,const BT::NodeConfiguration& config)
+        : CoroActionNode(name,config)
+    {
+        node_ = rclcpp::Node::make_shared("hp_full_checker");
+        hp_sub_ = node_->create_subscription<rm_interfaces::msg::SerialReceiveData>(
+            "/SerialReceiveData",10,
+            std::bind(&is_hp_full::HpChecker,this,std::placeholders::_1));
+        is_hp_full_ = false;
+
+
+    }
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+    BT::NodeStatus tick() override
+    {
+
+        RCLCPP_INFO(node_->get_logger(),"检查血量是否回满...");
+        is_hp_full_ = false;
+        while (!is_hp_full_)
+        {
+            rclcpp::spin_some(node_);
+            if (is_hp_full_)
+            {
+                return BT::NodeStatus::SUCCESS;
+            }else
+            {
+                return BT::NodeStatus::FAILURE;
+            }
+        }
+        return BT::NodeStatus::SUCCESS;
+    }
+    void HpChecker(const rm_interfaces::msg::SerialReceiveData::SharedPtr msg)
+    {
+        if (msg->judge_system_data.hp==250)
+        {
+            is_hp_full_ = true;
+        }
+
+    }
+
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<rm_interfaces::msg::SerialReceiveData>::SharedPtr hp_sub_;
+    bool is_hp_full_ = {};
 
 };

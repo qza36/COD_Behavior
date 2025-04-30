@@ -43,12 +43,12 @@
               <lowpower/>
               <Fallback>
                 <Sequence>
-                  <is_lowhp hp=""/>
-                  <SendNav2Goal goal_pose="home"/>
+                  <is_lowhp hp="100"/>
+                  <SendNav2Goal goal_pose="home_goal_position"/>
                 </Sequence>
                 <Sequence>
-                  <check_allow_shut_num allow_shut_num=""/>
-                  <SendNav2Goal goal_pose="home"/>
+                  <check_allow_shut_num allow_shut_num="150"/>
+                  <SendNav2Goal goal_pose="home_goal_position"/>
                 </Sequence>
                 <AlwaysSuccess/>
               </Fallback>

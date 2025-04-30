@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" project_name="Project">
+    <include path="t2.xml"/>
+    <!-- Description of Node Models (used by Groot) -->
+    <TreeNodesModel>
+        <Action ID="CheckNavResult" editable="true"/>
+        <Action ID="SendNav2Goal" editable="true">
+            <input_port name="goal_pose"/>
+        </Action>
+        <Action ID="attack_qs" editable="true"/>
+        <Action ID="buy_shut" editable="true"/>
+        <Action ID="check_allow_shut_num" editable="true">
+            <input_port name="allow_shut_num"/>
+        </Action>
+        <Action ID="is_lowhp" editable="true">
+            <input_port name="hp"/>
+        </Action>
+        <Action ID="is_qs_hp_low" editable="true">
+            <input_port name="qs_hp"/>
+        </Action>
+        <Action ID="lowpower" editable="true"/>
+        <Action ID="movearound" editable="true"/>
+        <Action ID="qsbroke" editable="true"/>
+    </TreeNodesModel>
+</root>
